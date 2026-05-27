@@ -20,8 +20,10 @@ public class ResultadoPanel extends JPanel {
     );
 
     private final JPanel painelConteudo;
+    private final org.ucsal.client.ui.GameWindow window;
 
-    public ResultadoPanel() {
+    public ResultadoPanel(org.ucsal.client.ui.GameWindow window) {
+        this.window = window;
         setBackground(GameColors.BG_PAGE);
         setLayout(new GridBagLayout());
 
@@ -70,9 +72,9 @@ public class ResultadoPanel extends JPanel {
         RoundedPanel card = new RoundedPanel(16);
         card.setBackground(GameColors.BG_CARD);
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
-        card.setBorder(new EmptyBorder(32, 36, 28, 36));
-        card.setPreferredSize(new Dimension(420, 480));
-        card.setMaximumSize(new Dimension(440, 540));
+        card.setBorder(new EmptyBorder(40, 36, 32, 36));
+        card.setPreferredSize(new Dimension(420, 580));
+        card.setMaximumSize(new Dimension(460, 620));
 
         // ── Ícone circular
         JPanel icone = criarIconeCirculo(venceu);
@@ -105,7 +107,15 @@ public class ResultadoPanel extends JPanel {
             tabela.add(criarLinha(dados[i][0], dados[i][1], !ultimo));
         }
 
-        // ── Botão Sair 
+        // ── Botão Jogar Novamente
+        JButton btnJogarNovamente = criarBotaoPrimario("JOGAR NOVAMENTE");
+        btnJogarNovamente.setAlignmentX(Component.CENTER_ALIGNMENT);
+        btnJogarNovamente.addActionListener(e -> {
+            window.getConexaoPanel().resetar();
+            window.mostrarPainel(org.ucsal.client.ui.GameWindow.PAINEL_CONEXAO);
+        });
+
+        // ── Botão Sair
         JButton btnSair = criarBotaoSair();
         btnSair.setAlignmentX(Component.CENTER_ALIGNMENT);
         btnSair.addActionListener(e -> System.exit(0));
@@ -116,6 +126,8 @@ public class ResultadoPanel extends JPanel {
         card.add(Box.createVerticalStrut(24));
         card.add(tabela);
         card.add(Box.createVerticalStrut(24));
+        card.add(btnJogarNovamente);
+        card.add(Box.createVerticalStrut(8));
         card.add(btnSair);
 
         painelConteudo.setLayout(new BorderLayout());
@@ -191,6 +203,35 @@ public class ResultadoPanel extends JPanel {
         return linha;
     }
 
+    private JButton criarBotaoPrimario(String texto) {
+        JButton btn = new JButton(texto) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                        RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(isEnabled() ? GameColors.BTN_PRIMARY : GameColors.BTN_DISABLED);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
+                g2.setFont(getFont());
+                g2.setColor(Color.WHITE);
+                FontMetrics fm = g2.getFontMetrics();
+                int x = (getWidth() - fm.stringWidth(getText())) / 2;
+                int y = (getHeight() + fm.getAscent() - fm.getDescent()) / 2;
+                g2.drawString(getText(), x, y);
+                g2.dispose();
+            }
+        };
+        btn.setFont(GameColors.FONT_BTN);
+        btn.setOpaque(false);
+        btn.setContentAreaFilled(false);
+        btn.setBorderPainted(false);
+        btn.setFocusPainted(false);
+        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btn.setPreferredSize(new Dimension(320, 44));
+        btn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
+        return btn;
+    }
+
     private JButton criarBotaoSair() {
         JButton btn = new JButton("Sair") {
             @Override
@@ -216,7 +257,7 @@ public class ResultadoPanel extends JPanel {
         btn.setFocusPainted(false);
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btn.setPreferredSize(new Dimension(200, 42));
-        btn.setMaximumSize(new Dimension(240, 42));
+        btn.setMaximumSize(new Dimension(280, 42));
         return btn;
     }
 }

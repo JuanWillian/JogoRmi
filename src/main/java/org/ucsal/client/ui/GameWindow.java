@@ -33,7 +33,7 @@ public class GameWindow extends JFrame {
         lobbyPanel     = new LobbyPanel();
         paridadePanel  = new EscolhaParidadePanel(gameUI, this);
         numeroPanel    = new EscolhaNumeroPanel(gameUI, this);
-        resultadoPanel = new ResultadoPanel();
+        resultadoPanel = new ResultadoPanel(this);
 
         container.add(conexaoPanel,   PAINEL_CONEXAO);
         container.add(lobbyPanel,     PAINEL_LOBBY);

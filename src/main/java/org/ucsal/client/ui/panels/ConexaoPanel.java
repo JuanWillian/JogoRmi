@@ -29,6 +29,9 @@ public class ConexaoPanel extends JPanel {
     private final GameUI     gameUI;
     private final GameWindow window;
 
+    /** Último JogadorImpl exportado — desexportado antes de cada nova conexão. */
+    private org.ucsal.client.JogadorImpl jogadorAtual;
+
     private final JTextField tfNome;
     private final JTextField tfCodigo;
     private final JButton    btnConectar;
@@ -289,11 +292,22 @@ public class ConexaoPanel extends JPanel {
                 System.setProperty("java.rmi.server.hostname", clienteIp);
             } catch (Exception ignored) { }
 
+            // Desexporta o JogadorImpl anterior para liberar o objeto RMI zumbi
+            if (jogadorAtual != null) {
+                try { java.rmi.server.UnicastRemoteObject.unexportObject(jogadorAtual, true); }
+                catch (Exception ignored) { }
+                jogadorAtual = null;
+            }
+
             CountDownLatch latch = new CountDownLatch(1);
             JogadorImpl jogador  = new JogadorImpl(nome, gameUI, latch);
+            jogadorAtual = jogador;
 
             // Bloqueia até a partida terminar (para J2) ou retorna rápido (para J1)
-            servidor.registrarJogador(jogador);
+            String retorno = servidor.registrarJogador(jogador);
+            if (retorno != null && (retorno.contains("cheia") || retorno.contains("andamento") || retorno.contains("registrado."))) {
+                throw new Exception(retorno);
+            }
 
             // Para J1: aguarda receberResultado() decrementar o latch
             // Para J2: latch já é 0 (receberResultado foi chamado dentro de registrarJogador)
